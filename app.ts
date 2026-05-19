@@ -1,6 +1,6 @@
 import Homey from 'homey';
 
-const APP_BUILD = '0.1.5-rawhttp';
+const APP_BUILD = '0.1.6-perprobe';
 const APP_BUILD_TS = new Date().toISOString();
 
 module.exports = class CyberQApp extends Homey.App {

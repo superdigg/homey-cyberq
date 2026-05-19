@@ -1,6 +1,6 @@
 {
   "id": "com.bbqguru.cyberq",
-  "version": "0.1.0",
+  "version": "0.1.6",
   "compatibility": ">=12.0.0",
   "sdk": 3,
   "platforms": ["local"],
@@ -64,19 +64,49 @@
         { "id": "OFF",   "title": { "en": "Off", "no": "Av" } }
       ]
     },
-    "cyberq_food_status": {
+    "cyberq_food1_status": {
       "type": "enum",
-      "title": { "en": "Food status", "no": "Mat-status" },
+      "title": { "en": "Food 1 status", "no": "Mat 1-status" },
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
       "values": [
-        { "id": "OK",    "title": { "en": "OK", "no": "OK" } },
-        { "id": "HIGH",  "title": { "en": "High", "no": "Høy" } },
-        { "id": "LOW",   "title": { "en": "Low", "no": "Lav" } },
-        { "id": "DONE",  "title": { "en": "Done", "no": "Ferdig" } },
-        { "id": "ERROR", "title": { "en": "Error", "no": "Feil" } },
-        { "id": "OFF",   "title": { "en": "Av", "no": "Av" } }
+        { "id": "OK",    "title": { "en": "OK",     "no": "OK" } },
+        { "id": "HIGH",  "title": { "en": "High",   "no": "Høy" } },
+        { "id": "LOW",   "title": { "en": "Low",    "no": "Lav" } },
+        { "id": "DONE",  "title": { "en": "Done",   "no": "Ferdig" } },
+        { "id": "ERROR", "title": { "en": "Error",  "no": "Feil" } },
+        { "id": "OFF",   "title": { "en": "Off",    "no": "Av" } }
+      ]
+    },
+    "cyberq_food2_status": {
+      "type": "enum",
+      "title": { "en": "Food 2 status", "no": "Mat 2-status" },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "values": [
+        { "id": "OK",    "title": { "en": "OK",     "no": "OK" } },
+        { "id": "HIGH",  "title": { "en": "High",   "no": "Høy" } },
+        { "id": "LOW",   "title": { "en": "Low",    "no": "Lav" } },
+        { "id": "DONE",  "title": { "en": "Done",   "no": "Ferdig" } },
+        { "id": "ERROR", "title": { "en": "Error",  "no": "Feil" } },
+        { "id": "OFF",   "title": { "en": "Off",    "no": "Av" } }
+      ]
+    },
+    "cyberq_food3_status": {
+      "type": "enum",
+      "title": { "en": "Food 3 status", "no": "Mat 3-status" },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "values": [
+        { "id": "OK",    "title": { "en": "OK",     "no": "OK" } },
+        { "id": "HIGH",  "title": { "en": "High",   "no": "Høy" } },
+        { "id": "LOW",   "title": { "en": "Low",    "no": "Lav" } },
+        { "id": "DONE",  "title": { "en": "Done",   "no": "Ferdig" } },
+        { "id": "ERROR", "title": { "en": "Error",  "no": "Feil" } },
+        { "id": "OFF",   "title": { "en": "Off",    "no": "Av" } }
       ]
     }
   },
@@ -96,7 +126,9 @@
         "target_temperature.food3",
         "cyberq_fan_output",
         "cyberq_cook_status",
-        "cyberq_food_status",
+        "cyberq_food1_status",
+        "cyberq_food2_status",
+        "cyberq_food3_status",
         "cyberq_timer_remaining",
         "alarm_generic"
       ],

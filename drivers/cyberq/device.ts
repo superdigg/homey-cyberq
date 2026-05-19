@@ -29,6 +29,8 @@ module.exports = class CyberQDevice extends Homey.Device {
 
   async onInit(): Promise<void> {
     this.log('>>> CyberQDevice onInit starting <<<');
+    await this.migrateCapabilities();
+
     const settings = this.getSettings() as DeviceSettings;
     this.log(`Settings: ${JSON.stringify(settings)}`);
     this.log(`Capabilities: ${JSON.stringify(this.getCapabilities())}`);
@@ -76,6 +78,31 @@ module.exports = class CyberQDevice extends Homey.Device {
   }
 
   async onDeleted(): Promise<void> { this.stopPolling(); }
+
+  /**
+   * Reconcile a device's capabilities with the manifest at init time.
+   * Safe to run on every boot — additions and removals are no-ops if the
+   * capability is already in the desired state.
+   */
+  private async migrateCapabilities(): Promise<void> {
+    // Removed in 0.1.6: single shared food status capability.
+    if (this.hasCapability('cyberq_food_status')) {
+      this.log('[migrate] removing legacy capability cyberq_food_status');
+      await this.removeCapability('cyberq_food_status').catch((e: any) =>
+        this.error('removeCapability failed:', e?.message ?? e),
+      );
+    }
+    // Added in 0.1.6: per-probe status.
+    for (const i of [1, 2, 3]) {
+      const cap = `cyberq_food${i}_status`;
+      if (!this.hasCapability(cap)) {
+        this.log(`[migrate] adding capability ${cap}`);
+        await this.addCapability(cap).catch((e: any) =>
+          this.error(`addCapability ${cap} failed:`, e?.message ?? e),
+        );
+      }
+    }
+  }
 
   // ── Polling ──────────────────────────────────────────────────────
   private async startPolling(): Promise<void> {
@@ -125,10 +152,10 @@ module.exports = class CyberQDevice extends Homey.Device {
     for (const { i, p } of probes) {
       await this.safeSet(`measure_temperature.food${i}`, round1(toC(p.temp)));
       await this.safeSet(`target_temperature.food${i}`, round1(toC(p.set)));
+      await this.safeSet(`cyberq_food${i}_status`, mapStatus(p.status));
     }
     await this.safeSet('cyberq_fan_output', status.fanOutput);
     await this.safeSet('cyberq_cook_status', mapStatus(status.cook.status));
-    await this.safeSet('cyberq_food_status', mapStatus(status.food1.status));
     await this.safeSet('cyberq_timer_remaining', status.timerCurr || '');
     await this.safeSet('alarm_generic', status.fanShorted);
     await this.triggerFlowsForStatus(status);

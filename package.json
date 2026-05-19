@@ -1,6 +1,6 @@
 {
   "name": "com.bbqguru.cyberq",
-  "version": "0.1.0",
+  "version": "0.1.6",
   "description": "BBQ Guru CyberQ WiFi controller integration for Homey",
   "main": "app.js",
   "scripts": {
