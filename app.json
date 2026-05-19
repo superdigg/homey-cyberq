@@ -1,6 +1,6 @@
 {
   "id": "com.bbqguru.cyberq",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "compatibility": ">=12.0.0",
   "sdk": 3,
   "platforms": ["local"],
@@ -64,20 +64,65 @@
         { "id": "OFF",   "title": { "en": "Off", "no": "Av" } }
       ]
     },
-    "cyberq_food_status": {
+    "cyberq_food1_status": {
       "type": "enum",
-      "title": { "en": "Food status", "no": "Mat-status" },
+      "title": { "en": "Food 1 status", "no": "Mat 1-status" },
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
       "values": [
-        { "id": "OK",    "title": { "en": "OK", "no": "OK" } },
-        { "id": "HIGH",  "title": { "en": "High", "no": "Høy" } },
-        { "id": "LOW",   "title": { "en": "Low", "no": "Lav" } },
-        { "id": "DONE",  "title": { "en": "Done", "no": "Ferdig" } },
-        { "id": "ERROR", "title": { "en": "Error", "no": "Feil" } },
-        { "id": "OFF",   "title": { "en": "Av", "no": "Av" } }
+        { "id": "OK",    "title": { "en": "OK",     "no": "OK" } },
+        { "id": "HIGH",  "title": { "en": "High",   "no": "Høy" } },
+        { "id": "LOW",   "title": { "en": "Low",    "no": "Lav" } },
+        { "id": "DONE",  "title": { "en": "Done",   "no": "Ferdig" } },
+        { "id": "ERROR", "title": { "en": "Error",  "no": "Feil" } },
+        { "id": "OFF",   "title": { "en": "Off",    "no": "Av" } }
       ]
+    },
+    "cyberq_food2_status": {
+      "type": "enum",
+      "title": { "en": "Food 2 status", "no": "Mat 2-status" },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "values": [
+        { "id": "OK",    "title": { "en": "OK",     "no": "OK" } },
+        { "id": "HIGH",  "title": { "en": "High",   "no": "Høy" } },
+        { "id": "LOW",   "title": { "en": "Low",    "no": "Lav" } },
+        { "id": "DONE",  "title": { "en": "Done",   "no": "Ferdig" } },
+        { "id": "ERROR", "title": { "en": "Error",  "no": "Feil" } },
+        { "id": "OFF",   "title": { "en": "Off",    "no": "Av" } }
+      ]
+    },
+    "cyberq_food3_status": {
+      "type": "enum",
+      "title": { "en": "Food 3 status", "no": "Mat 3-status" },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "values": [
+        { "id": "OK",    "title": { "en": "OK",     "no": "OK" } },
+        { "id": "HIGH",  "title": { "en": "High",   "no": "Høy" } },
+        { "id": "LOW",   "title": { "en": "Low",    "no": "Lav" } },
+        { "id": "DONE",  "title": { "en": "Done",   "no": "Ferdig" } },
+        { "id": "ERROR", "title": { "en": "Error",  "no": "Feil" } },
+        { "id": "OFF",   "title": { "en": "Off",    "no": "Av" } }
+      ]
+    },
+    "cooking_session_active": {
+      "type": "boolean",
+      "title": { "en": "Session active", "no": "Sesjon aktiv" },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/session.svg"
+    },
+    "cooking_session_name": {
+      "type": "string",
+      "title": { "en": "Session", "no": "Sesjon" },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor"
     }
   },
   "drivers": [
@@ -96,9 +141,13 @@
         "target_temperature.food3",
         "cyberq_fan_output",
         "cyberq_cook_status",
-        "cyberq_food_status",
+        "cyberq_food1_status",
+        "cyberq_food2_status",
+        "cyberq_food3_status",
         "cyberq_timer_remaining",
-        "alarm_generic"
+        "alarm_generic",
+        "cooking_session_active",
+        "cooking_session_name"
       ],
       "capabilitiesOptions": {
         "measure_temperature": {
@@ -281,6 +330,31 @@
         "args": [
           { "name": "device", "type": "device", "filter": "driver_id=cyberq" }
         ]
+      },
+      {
+        "id": "session_started",
+        "title": { "en": "Cooking session started", "no": "Cook-sesjon startet" },
+        "tokens": [
+          { "name": "name", "type": "string", "title": { "en": "Session name", "no": "Sesjonsnavn" } }
+        ],
+        "args": [
+          { "name": "device", "type": "device", "filter": "driver_id=cyberq" }
+        ]
+      },
+      {
+        "id": "session_ended",
+        "title": { "en": "Cooking session ended", "no": "Cook-sesjon avsluttet" },
+        "tokens": [
+          { "name": "name", "type": "string", "title": { "en": "Session name", "no": "Sesjonsnavn" } },
+          { "name": "duration_min", "type": "number", "title": { "en": "Duration (min)", "no": "Varighet (min)" } },
+          { "name": "samples", "type": "number", "title": { "en": "Samples", "no": "Datapunkter" } },
+          { "name": "pit_peak", "type": "number", "title": { "en": "Peak pit (°C)", "no": "Topp pit (°C)" } },
+          { "name": "pit_avg", "type": "number", "title": { "en": "Avg pit (°C)", "no": "Snitt pit (°C)" } },
+          { "name": "file", "type": "string", "title": { "en": "File path", "no": "Filsti" } }
+        ],
+        "args": [
+          { "name": "device", "type": "device", "filter": "driver_id=cyberq" }
+        ]
       }
     ],
     "conditions": [
@@ -337,6 +411,38 @@
             ]
           },
           { "name": "temperature", "type": "number", "min": 20, "max": 110, "step": 1, "title": { "en": "Temperature (°C)", "no": "Temperatur (°C)" } }
+        ]
+      },
+      {
+        "id": "start_session",
+        "title": { "en": "Start cooking session", "no": "Start cook-sesjon" },
+        "titleFormatted": {
+          "en": "Start session [[name]] ([[note]])",
+          "no": "Start sesjon [[name]] ([[note]])"
+        },
+        "args": [
+          { "name": "device", "type": "device", "filter": "driver_id=cyberq" },
+          { "name": "name", "type": "text", "title": { "en": "Session name", "no": "Sesjonsnavn" }, "placeholder": { "en": "e.g. Pulled pork", "no": "f.eks. Pulled pork" } },
+          { "name": "note", "type": "text", "title": { "en": "Note (optional)", "no": "Notat (valgfritt)" }, "required": false, "placeholder": { "en": "Meat weight, wood, etc.", "no": "Kjøttvekt, røyk, osv." } }
+        ]
+      },
+      {
+        "id": "stop_session",
+        "title": { "en": "Stop cooking session", "no": "Stopp cook-sesjon" },
+        "args": [
+          { "name": "device", "type": "device", "filter": "driver_id=cyberq" }
+        ]
+      },
+      {
+        "id": "add_session_note",
+        "title": { "en": "Add note to session", "no": "Legg til notat i sesjon" },
+        "titleFormatted": {
+          "en": "Add note: [[note]]",
+          "no": "Legg til notat: [[note]]"
+        },
+        "args": [
+          { "name": "device", "type": "device", "filter": "driver_id=cyberq" },
+          { "name": "note", "type": "text", "title": { "en": "Note", "no": "Notat" } }
         ]
       }
     ]

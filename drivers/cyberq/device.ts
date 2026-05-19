@@ -5,6 +5,7 @@ import {
   DegUnits,
   fToC,
 } from '../../lib/CyberQClient';
+import { SessionRecorder } from '../../lib/SessionRecorder';
 
 type Probe = 1 | 2 | 3;
 
@@ -27,17 +28,36 @@ module.exports = class CyberQDevice extends Homey.Device {
   /** Most recent successful poll — used as baseline for writes. */
   private latestStatus?: CyberQStatus;
 
+  /** Session recorder — manages the lifecycle of a cooking session. */
+  private sessionRecorder!: SessionRecorder;
+
   async onInit(): Promise<void> {
     this.log('>>> CyberQDevice onInit starting <<<');
+    await this.migrateCapabilities();
+
     const settings = this.getSettings() as DeviceSettings;
     this.log(`Settings: ${JSON.stringify(settings)}`);
-    this.log(`Capabilities: ${JSON.stringify(this.getCapabilities())}`);
 
     this.client = new CyberQClient({
       host: settings.host,
       port: settings.port,
       logger: (msg) => this.log(msg),
     });
+
+    // Session recorder. /userdata is Homey's app-private writable directory,
+    // also reachable over HTTPS at https://<homey>/app/<app.id>/userdata/ —
+    // handy for grabbing session JSON files from a browser.
+    this.sessionRecorder = new SessionRecorder(
+      '/userdata',
+      {
+        get: (k) => this.getStoreValue(k),
+        set: async (k, v) => { await this.setStoreValue(k, v); },
+        unset: async (k) => { await this.unsetStoreValue(k); },
+      },
+      (msg) => this.log(msg),
+    );
+    await this.sessionRecorder.load();
+    await this.reflectSessionState();
 
     this.registerCapabilityListener('target_temperature', async (value: number) => {
       this.log(`<<< CAPABILITY: target_temperature ← ${value}°C >>>`);
@@ -76,6 +96,40 @@ module.exports = class CyberQDevice extends Homey.Device {
   }
 
   async onDeleted(): Promise<void> { this.stopPolling(); }
+
+  /**
+   * Reconcile a device's capabilities with the manifest at init time.
+   * Safe to run on every boot — additions and removals are no-ops if the
+   * capability is already in the desired state.
+   */
+  private async migrateCapabilities(): Promise<void> {
+    // Removed in 0.1.6: single shared food status capability.
+    if (this.hasCapability('cyberq_food_status')) {
+      this.log('[migrate] removing legacy capability cyberq_food_status');
+      await this.removeCapability('cyberq_food_status').catch((e: any) =>
+        this.error('removeCapability failed:', e?.message ?? e),
+      );
+    }
+    // Added in 0.1.6: per-probe status.
+    for (const i of [1, 2, 3]) {
+      const cap = `cyberq_food${i}_status`;
+      if (!this.hasCapability(cap)) {
+        this.log(`[migrate] adding capability ${cap}`);
+        await this.addCapability(cap).catch((e: any) =>
+          this.error(`addCapability ${cap} failed:`, e?.message ?? e),
+        );
+      }
+    }
+    // Added in 0.2.0: session tracking.
+    for (const cap of ['cooking_session_active', 'cooking_session_name']) {
+      if (!this.hasCapability(cap)) {
+        this.log(`[migrate] adding capability ${cap}`);
+        await this.addCapability(cap).catch((e: any) =>
+          this.error(`addCapability ${cap} failed:`, e?.message ?? e),
+        );
+      }
+    }
+  }
 
   // ── Polling ──────────────────────────────────────────────────────
   private async startPolling(): Promise<void> {
@@ -125,12 +179,32 @@ module.exports = class CyberQDevice extends Homey.Device {
     for (const { i, p } of probes) {
       await this.safeSet(`measure_temperature.food${i}`, round1(toC(p.temp)));
       await this.safeSet(`target_temperature.food${i}`, round1(toC(p.set)));
+      await this.safeSet(`cyberq_food${i}_status`, mapStatus(p.status));
     }
     await this.safeSet('cyberq_fan_output', status.fanOutput);
     await this.safeSet('cyberq_cook_status', mapStatus(status.cook.status));
-    await this.safeSet('cyberq_food_status', mapStatus(status.food1.status));
     await this.safeSet('cyberq_timer_remaining', status.timerCurr || '');
     await this.safeSet('alarm_generic', status.fanShorted);
+
+    // Record sample if a session is active
+    if (this.sessionRecorder?.isActive()) {
+      this.sessionRecorder.addSample({
+        pitTempC:   round1(toC(status.cook.temp)),
+        pitSetC:    round1(toC(status.cook.set)),
+        food1TempC: round1(toC(status.food1.temp)),
+        food1SetC:  round1(toC(status.food1.set)),
+        food2TempC: round1(toC(status.food2.temp)),
+        food2SetC:  round1(toC(status.food2.set)),
+        food3TempC: round1(toC(status.food3.temp)),
+        food3SetC:  round1(toC(status.food3.set)),
+        fan:        status.fanOutput,
+        cookStatus: mapStatus(status.cook.status),
+        food1Status: mapStatus(status.food1.status),
+        food2Status: mapStatus(status.food2.status),
+        food3Status: mapStatus(status.food3.status),
+      });
+    }
+
     await this.triggerFlowsForStatus(status);
   }
 
@@ -203,6 +277,54 @@ module.exports = class CyberQDevice extends Homey.Device {
       await this.client.submitState(state);
     });
     this.log('[setFoodTarget] complete');
+  }
+
+  // ── Sessions ────────────────────────────────────────────────────
+  async startSession(name: string, note: string): Promise<void> {
+    this.log(`[session] start request: name="${name}" note="${note}"`);
+    const s = this.latestStatus;
+    await this.sessionRecorder.start({
+      name,
+      note,
+      foodNames: s
+        ? { food1: s.food1.name, food2: s.food2.name, food3: s.food3.name }
+        : undefined,
+    });
+    await this.reflectSessionState();
+    this.homey.flow
+      .getDeviceTriggerCard('session_started')
+      .trigger(this, { name: this.sessionRecorder.currentName() })
+      .catch(this.error);
+  }
+
+  async stopSession(): Promise<void> {
+    this.log('[session] stop request');
+    const summary = await this.sessionRecorder.stop();
+    await this.reflectSessionState();
+    this.homey.flow
+      .getDeviceTriggerCard('session_ended')
+      .trigger(this, {
+        name: summary.name,
+        duration_min: summary.durationMin,
+        samples: summary.sampleCount,
+        pit_peak: summary.pitPeakC,
+        pit_avg: summary.pitAvgC,
+        file: summary.filePath,
+      })
+      .catch(this.error);
+  }
+
+  addSessionNote(text: string): void {
+    if (!this.sessionRecorder?.isActive()) {
+      throw new Error('No active session to add a note to.');
+    }
+    this.sessionRecorder.addNote(text);
+  }
+
+  private async reflectSessionState(): Promise<void> {
+    const active = this.sessionRecorder?.isActive() ?? false;
+    await this.safeSet('cooking_session_active', active);
+    await this.safeSet('cooking_session_name', active ? this.sessionRecorder.currentName() : '');
   }
 
   /**
