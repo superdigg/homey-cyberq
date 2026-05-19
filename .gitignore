@@ -1,0 +1,13 @@
+node_modules/
+.homeybuild/
+*.log
+.DS_Store
+env.json
+
+# Compiled TS
+app.js
+app.js.map
+lib/**/*.js
+lib/**/*.js.map
+drivers/**/*.js
+drivers/**/*.js.map

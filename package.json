@@ -1,0 +1,27 @@
+{
+  "name": "com.bbqguru.cyberq",
+  "version": "0.1.0",
+  "description": "BBQ Guru CyberQ WiFi controller integration for Homey",
+  "main": "app.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "run": "homey app run",
+    "install:homey": "homey app install",
+    "validate": "homey app validate"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.5.0"
+  },
+  "devDependencies": {
+    "@tsconfig/node12": "^1.0.11",
+    "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
+    "@types/node": "^20.11.0",
+    "homey-lib": "^2.50.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

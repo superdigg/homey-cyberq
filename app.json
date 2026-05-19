@@ -1,0 +1,344 @@
+{
+  "id": "com.bbqguru.cyberq",
+  "version": "0.1.0",
+  "compatibility": ">=12.0.0",
+  "sdk": 3,
+  "platforms": ["local"],
+  "name": {
+    "en": "BBQ Guru CyberQ",
+    "no": "BBQ Guru CyberQ"
+  },
+  "description": {
+    "en": "Connect your BBQ Guru CyberQ WiFi controller to Homey.",
+    "no": "Koble BBQ Guru CyberQ WiFi-kontrolleren til Homey."
+  },
+  "category": ["appliances"],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Thomas"
+  },
+  "brandColor": "#B5121B",
+  "tags": {
+    "en": ["bbq", "smoker", "thermometer", "cyberq", "bbq guru"],
+    "no": ["bbq", "røyker", "termometer", "cyberq", "bbq guru"]
+  },
+  "capabilities": {
+    "cyberq_fan_output": {
+      "type": "number",
+      "title": { "en": "Fan output", "no": "Vifte" },
+      "units": { "en": "%", "no": "%" },
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "chartType": "stepLine",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/fan.svg"
+    },
+    "cyberq_timer_remaining": {
+      "type": "string",
+      "title": { "en": "Timer", "no": "Timer" },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/timer.svg"
+    },
+    "cyberq_cook_status": {
+      "type": "enum",
+      "title": { "en": "Pit status", "no": "Pit-status" },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "values": [
+        { "id": "OK",    "title": { "en": "OK", "no": "OK" } },
+        { "id": "HIGH",  "title": { "en": "High", "no": "Høy" } },
+        { "id": "LOW",   "title": { "en": "Low", "no": "Lav" } },
+        { "id": "DONE",  "title": { "en": "Done", "no": "Ferdig" } },
+        { "id": "ERROR", "title": { "en": "Error", "no": "Feil" } },
+        { "id": "OFF",   "title": { "en": "Off", "no": "Av" } }
+      ]
+    },
+    "cyberq_food_status": {
+      "type": "enum",
+      "title": { "en": "Food status", "no": "Mat-status" },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "values": [
+        { "id": "OK",    "title": { "en": "OK", "no": "OK" } },
+        { "id": "HIGH",  "title": { "en": "High", "no": "Høy" } },
+        { "id": "LOW",   "title": { "en": "Low", "no": "Lav" } },
+        { "id": "DONE",  "title": { "en": "Done", "no": "Ferdig" } },
+        { "id": "ERROR", "title": { "en": "Error", "no": "Feil" } },
+        { "id": "OFF",   "title": { "en": "Av", "no": "Av" } }
+      ]
+    }
+  },
+  "drivers": [
+    {
+      "id": "cyberq",
+      "name": { "en": "CyberQ WiFi", "no": "CyberQ WiFi" },
+      "class": "other",
+      "capabilities": [
+        "measure_temperature",
+        "target_temperature",
+        "measure_temperature.food1",
+        "target_temperature.food1",
+        "measure_temperature.food2",
+        "target_temperature.food2",
+        "measure_temperature.food3",
+        "target_temperature.food3",
+        "cyberq_fan_output",
+        "cyberq_cook_status",
+        "cyberq_food_status",
+        "cyberq_timer_remaining",
+        "alarm_generic"
+      ],
+      "capabilitiesOptions": {
+        "measure_temperature": {
+          "title": { "en": "Pit temperature", "no": "Pit-temperatur" }
+        },
+        "target_temperature": {
+          "title": { "en": "Pit target", "no": "Pit-måltemperatur" },
+          "min": 50,
+          "max": 230,
+          "step": 1
+        },
+        "measure_temperature.food1": {
+          "title": { "en": "Food 1", "no": "Mat 1" }
+        },
+        "target_temperature.food1": {
+          "title": { "en": "Food 1 target", "no": "Mat 1 måltemperatur" },
+          "min": 20,
+          "max": 110,
+          "step": 1
+        },
+        "measure_temperature.food2": {
+          "title": { "en": "Food 2", "no": "Mat 2" }
+        },
+        "target_temperature.food2": {
+          "title": { "en": "Food 2 target", "no": "Mat 2 måltemperatur" },
+          "min": 20,
+          "max": 110,
+          "step": 1
+        },
+        "measure_temperature.food3": {
+          "title": { "en": "Food 3", "no": "Mat 3" }
+        },
+        "target_temperature.food3": {
+          "title": { "en": "Food 3 target", "no": "Mat 3 måltemperatur" },
+          "min": 20,
+          "max": 110,
+          "step": 1
+        },
+        "alarm_generic": {
+          "title": { "en": "Fan fault", "no": "Viftefeil" }
+        }
+      },
+      "platforms": ["local"],
+      "connectivity": ["lan"],
+      "images": {
+        "small": "/drivers/cyberq/assets/images/small.png",
+        "large": "/drivers/cyberq/assets/images/large.png",
+        "xlarge": "/drivers/cyberq/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "configure",
+          "navigation": { "next": "list_devices" }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": { "next": "add_devices" }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "id": "host",
+          "type": "text",
+          "label": { "en": "IP address", "no": "IP-adresse" },
+          "value": "",
+          "hint": {
+            "en": "Local IP of the CyberQ (set a static DHCP lease for reliability).",
+            "no": "Lokal IP-adresse til CyberQ. Reserver en statisk DHCP-leie i ruteren."
+          }
+        },
+        {
+          "id": "port",
+          "type": "number",
+          "label": { "en": "Port", "no": "Port" },
+          "value": 80,
+          "min": 1,
+          "max": 65535
+        },
+        {
+          "id": "poll_interval",
+          "type": "number",
+          "label": { "en": "Poll interval (s)", "no": "Polleintervall (s)" },
+          "value": 5,
+          "min": 2,
+          "max": 60
+        },
+        {
+          "id": "offline_poll_interval",
+          "type": "number",
+          "label": { "en": "Offline poll interval (s)", "no": "Polleintervall når av (s)" },
+          "value": 60,
+          "min": 10,
+          "max": 600,
+          "hint": {
+            "en": "Used after the device has been unreachable for a while.",
+            "no": "Brukes når enheten har vært utilgjengelig en stund."
+          }
+        }
+      ]
+    }
+  ],
+  "flow": {
+    "triggers": [
+      {
+        "id": "pit_temp_changed",
+        "title": { "en": "Pit temperature changed", "no": "Pit-temperatur endret" },
+        "tokens": [
+          { "name": "temperature", "type": "number", "title": { "en": "Temperature", "no": "Temperatur" } }
+        ],
+        "args": [
+          { "name": "device", "type": "device", "filter": "driver_id=cyberq" }
+        ]
+      },
+      {
+        "id": "pit_below_setpoint",
+        "title": { "en": "Pit dropped below setpoint by !{{|at least}}", "no": "Pit-temp falt under måltemperatur med !{{|minst}}" },
+        "titleFormatted": {
+          "en": "Pit dropped below setpoint by [[delta]]°C",
+          "no": "Pit-temp falt under måltemperatur med [[delta]]°C"
+        },
+        "tokens": [
+          { "name": "delta", "type": "number", "title": { "en": "Delta", "no": "Avvik" } },
+          { "name": "temperature", "type": "number", "title": { "en": "Pit temperature", "no": "Pit-temp" } }
+        ],
+        "args": [
+          { "name": "device", "type": "device", "filter": "driver_id=cyberq" },
+          { "name": "delta", "type": "number", "min": 1, "max": 100, "step": 1, "title": { "en": "Degrees (°C)", "no": "Grader (°C)" } }
+        ]
+      },
+      {
+        "id": "food_probe_done",
+        "title": { "en": "Food probe reached target", "no": "Mat-probe nådde måltemperatur" },
+        "titleFormatted": {
+          "en": "Food probe [[probe]] reached target",
+          "no": "Mat-probe [[probe]] nådde måltemperatur"
+        },
+        "tokens": [
+          { "name": "probe", "type": "number", "title": { "en": "Probe", "no": "Probe" } },
+          { "name": "name", "type": "string", "title": { "en": "Probe name", "no": "Probe-navn" } },
+          { "name": "temperature", "type": "number", "title": { "en": "Temperature", "no": "Temperatur" } }
+        ],
+        "args": [
+          { "name": "device", "type": "device", "filter": "driver_id=cyberq" },
+          {
+            "name": "probe",
+            "type": "dropdown",
+            "title": { "en": "Probe", "no": "Probe" },
+            "values": [
+              { "id": "1", "label": { "en": "Food 1", "no": "Mat 1" } },
+              { "id": "2", "label": { "en": "Food 2", "no": "Mat 2" } },
+              { "id": "3", "label": { "en": "Food 3", "no": "Mat 3" } },
+              { "id": "any", "label": { "en": "Any probe", "no": "Hvilken som helst" } }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "fan_output_above",
+        "title": { "en": "Fan output rose above !{{|at least}}", "no": "Vifte over !{{|minst}}" },
+        "titleFormatted": {
+          "en": "Fan output rose above [[threshold]]%",
+          "no": "Vifte over [[threshold]]%"
+        },
+        "tokens": [
+          { "name": "fan", "type": "number", "title": { "en": "Fan %", "no": "Vifte %" } }
+        ],
+        "args": [
+          { "name": "device", "type": "device", "filter": "driver_id=cyberq" },
+          { "name": "threshold", "type": "number", "min": 0, "max": 100, "step": 5, "title": { "en": "Threshold %", "no": "Terskel %" } }
+        ]
+      },
+      {
+        "id": "fan_fault",
+        "title": { "en": "Fan fault detected", "no": "Viftefeil oppdaget" },
+        "args": [
+          { "name": "device", "type": "device", "filter": "driver_id=cyberq" }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "id": "is_cooking",
+        "title": { "en": "BBQ !{{is|is not}} cooking", "no": "BBQ !{{er|er ikke}} i gang" },
+        "args": [
+          { "name": "device", "type": "device", "filter": "driver_id=cyberq" }
+        ]
+      },
+      {
+        "id": "pit_within_band",
+        "title": { "en": "Pit !{{is|is not}} within !{{|}}°C of setpoint", "no": "Pit !{{er|er ikke}} innenfor !{{|}}°C av måltemp" },
+        "titleFormatted": {
+          "en": "Pit !{{is|is not}} within [[band]]°C of setpoint",
+          "no": "Pit !{{er|er ikke}} innenfor [[band]]°C av måltemp"
+        },
+        "args": [
+          { "name": "device", "type": "device", "filter": "driver_id=cyberq" },
+          { "name": "band", "type": "number", "min": 1, "max": 30, "step": 1, "title": { "en": "Band (°C)", "no": "Bånd (°C)" } }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "set_pit_temperature",
+        "title": { "en": "Set pit temperature to !{{|}}", "no": "Sett pit-temp til !{{|}}" },
+        "titleFormatted": {
+          "en": "Set pit temperature to [[temperature]]°C",
+          "no": "Sett pit-temp til [[temperature]]°C"
+        },
+        "args": [
+          { "name": "device", "type": "device", "filter": "driver_id=cyberq" },
+          { "name": "temperature", "type": "number", "min": 50, "max": 230, "step": 1, "title": { "en": "Temperature (°C)", "no": "Temperatur (°C)" } }
+        ]
+      },
+      {
+        "id": "set_food_temperature",
+        "title": { "en": "Set food probe !{{|}} target to !{{|}}", "no": "Sett mat-probe !{{|}} mål til !{{|}}" },
+        "titleFormatted": {
+          "en": "Set food probe [[probe]] target to [[temperature]]°C",
+          "no": "Sett mat-probe [[probe]] mål til [[temperature]]°C"
+        },
+        "args": [
+          { "name": "device", "type": "device", "filter": "driver_id=cyberq" },
+          {
+            "name": "probe",
+            "type": "dropdown",
+            "title": { "en": "Probe", "no": "Probe" },
+            "values": [
+              { "id": "1", "label": { "en": "Food 1", "no": "Mat 1" } },
+              { "id": "2", "label": { "en": "Food 2", "no": "Mat 2" } },
+              { "id": "3", "label": { "en": "Food 3", "no": "Mat 3" } }
+            ]
+          },
+          { "name": "temperature", "type": "number", "min": 20, "max": 110, "step": 1, "title": { "en": "Temperature (°C)", "no": "Temperatur (°C)" } }
+        ]
+      }
+    ]
+  }
+}
